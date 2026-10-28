@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoRoot — AI Climate Intelligence | Team-Ambit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --bg:#05100b; --bg2:#0a1c14; --panel:rgba(255,255,255,.055); --line:rgba(255,255,255,.10);
+  --tx:#eaf6ef; --mut:#9db4a8; --dim:#6f877b;
+  --good:#4ade80; --lgood:#a3e635; --mod:#facc15; --bad:#f87171; --water:#38bdf8; --heat:#fb923c;
+  --r:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.55;overflow-x:hidden}
+h1,h2,h3,h4,.display{font-family:'Sora','DM Sans',sans-serif;letter-spacing:-.02em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--water);outline-offset:2px}
+#atmos{position:fixed;inset:0;z-index:-1;width:100%;height:100%;background:radial-gradient(1200px 700px at 12% -10%,rgba(34,197,94,.16),transparent 60%),radial-gradient(900px 600px at 100% 100%,rgba(56,189,248,.10),transparent 60%),var(--bg)}
+
+/* sidebar */
+#side{position:fixed;left:0;top:0;bottom:0;width:216px;padding:22px 14px;background:rgba(6,18,12,.82);backdrop-filter:blur(16px);border-right:1px solid var(--line);z-index:900;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;font-family:Sora;font-weight:800;font-size:19px;padding:0 8px 16px}
+.brand i{font-style:normal;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#22c55e,#0ea5e9)}
+#side a{display:flex;gap:10px;align-items:center;padding:9px 11px;border-radius:11px;color:var(--mut);text-decoration:none;font-size:14px;transition:.2s}
+#side a:hover{background:rgba(255,255,255,.06);color:var(--tx)}
+#side a.on{background:rgba(74,222,128,.14);color:var(--good)}
+#side .grow{flex:1}
+.demo-btn{margin-top:8px;border:0;border-radius:12px;padding:11px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#1b0a02}
+main{margin-left:216px}
+section.blk{width:min(1180px,94%);margin:0 auto;padding:84px 0 20px}
+.hd{margin-bottom:26px;max-width:760px}
+.hd h2{font-size:clamp(26px,3.6vw,40px);line-height:1.12;margin-bottom:10px}
+.hd p{color:var(--mut)}
+.glass{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;backdrop-filter:blur(10px)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.muted{color:var(--mut)} .small{font-size:12.5px} .dim{color:var(--dim)}
+.btn{border:0;border-radius:12px;padding:12px 20px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
+.btn.p{background:var(--good);color:#032010}.btn.p:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(74,222,128,.3)}
+.btn.s{background:rgba(255,255,255,.07);border:1px solid var(--line)}.btn.s:hover{background:rgba(255,255,255,.12)}
+.btn.sm{padding:8px 13px;font-size:13px;border-radius:10px}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.03em;vertical-align:middle}
+.t-LIVE{background:rgba(56,189,248,.18);color:#7dd3fc}
+.t-MODELLED{background:rgba(250,204,21,.16);color:#fde047}
+.t-USER{background:rgba(255,255,255,.16);color:#fff}
+.t-DEMO{background:rgba(167,139,250,.18);color:#c4b5fd}
+
+/* hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;width:min(1180px,94%);margin:0 auto;padding:60px 0}
+.hero h1{font-size:clamp(54px,11vw,140px);font-weight:800;line-height:.9;letter-spacing:-.05em;background:linear-gradient(100deg,#86efac 0%,#4ade80 35%,#38bdf8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .tagline{font-family:Sora;font-size:clamp(20px,3vw,32px);margin:22px 0 10px;max-width:760px;font-weight:600}
+.hero .sub{color:var(--mut);max-width:620px;font-size:17px}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 38px}
+.live3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:820px}
+.live3 .glass{padding:16px}
+.live3 b{display:block;font-family:Sora;font-size:30px;line-height:1.1;margin-top:4px}
+.live3 small{color:var(--mut)}
+.path{display:flex;flex-wrap:wrap;gap:8px;margin-top:34px;font-size:13px;color:var(--mut)}
+.path span{padding:5px 11px;border:1px solid var(--line);border-radius:99px}
+
+/* map */
+.mapwrap{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input{flex:1;min-width:160px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+#map{height:580px;border-radius:14px;overflow:hidden;background:#0d1f17}
+.leaflet-container{font-family:'DM Sans',sans-serif}
+.leaflet-control-layers{background:#0d2117;color:var(--tx);border:1px solid var(--line);border-radius:10px}
+.leaflet-control-layers-expanded{padding:8px 10px}
+.legend{margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--mut)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.chip{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:99px;padding:6px 12px;font-size:12.5px;cursor:pointer;color:var(--tx)}
+.chip:hover{background:rgba(74,222,128,.14)}
+.rep h3{font-size:13px;color:var(--good);font-weight:700;letter-spacing:.04em}
+.rep .loc{font-family:Sora;font-size:20px;margin:4px 0 2px}
+.gaugeRow{display:flex;gap:18px;align-items:center;margin:16px 0}
+.gauge{position:relative;width:132px;height:132px;flex:none}
+.gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gauge circle{fill:none;stroke-width:11;stroke-linecap:round}
+.gauge .bg{stroke:rgba(255,255,255,.09)}
+.gauge .fg{stroke:var(--good);stroke-dasharray:339.3;stroke-dashoffset:339.3;transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1),stroke .5s}
+.gauge div{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-family:Sora}
+.gauge b{font-size:32px;line-height:1}.gauge small{font-size:11px;color:var(--mut);font-family:'DM Sans'}
+.verdict{display:inline-block;padding:7px 14px;border-radius:99px;font-weight:800;font-size:13px}
+.v-plant{background:rgba(74,222,128,.16);color:var(--good)}.v-imp{background:rgba(250,204,21,.16);color:var(--mod)}.v-avoid{background:rgba(248,113,113,.16);color:var(--bad)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:rgba(0,0,0,.22);border-radius:12px;padding:9px 11px}
+.tile span{display:block;font-size:11.5px;color:var(--mut)}.tile b{font-size:15px}
+.tile .tag{margin-left:2px}
+.why{margin-top:14px;font-size:14px;color:#cfe3d8;border-left:3px solid var(--good);padding-left:12px}
+.story{margin-top:18px;padding:26px 28px;border-radius:22px;background:linear-gradient(135deg,rgba(34,197,94,.20),rgba(14,165,233,.14));border:1px solid rgba(74,222,128,.35)}
+.story h3{font-size:13px;color:var(--good);letter-spacing:.06em;margin-bottom:8px}
+.story p{font-family:Sora;font-size:clamp(17px,2.1vw,23px);font-weight:500;line-height:1.5}
+
+/* trees */
+.treeGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.tree{position:relative}
+.tree .pct{position:absolute;right:16px;top:14px;font-family:Sora;font-size:24px;color:var(--good);font-weight:700}
+.tree h3{font-size:20px}.tree .lat{font-size:12px;color:var(--dim);font-style:italic}
+.tree dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px;margin:12px 0}
+.tree dt{color:var(--mut)}
+.tree .whyt{font-size:13px;background:rgba(0,0,0,.22);border-radius:10px;padding:9px 11px;color:#cfe3d8}
+.tree .whyt b{color:var(--good)}
+
+/* meters */
+.meters{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 26px}
+.meter .top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.bar{height:9px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:9px;transition:width .9s cubic-bezier(.2,.8,.2,1),background .5s}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 18px}
+.flow .st{flex:1;min-width:92px;text-align:center;padding:12px 6px;border-radius:14px;background:rgba(56,189,248,.10);border:1px solid rgba(56,189,248,.3);font-size:13px;font-weight:700;animation:glow 5s infinite}
+.flow .st:nth-child(3){animation-delay:.6s}.flow .st:nth-child(5){animation-delay:1.2s}.flow .st:nth-child(7){animation-delay:1.8s}.flow .st:nth-child(9){animation-delay:2.4s}
+.flow .ar{color:var(--water)}
+@keyframes glow{0%,60%,100%{background:rgba(56,189,248,.10)}20%{background:rgba(56,189,248,.34)}}
+.iv{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:14px}
+.iv .glass{padding:14px}.iv b{display:block;margin-bottom:3px}.iv p{font-size:13px;color:var(--mut)}
+
+/* domino */
+.dom{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:10px 0 20px}
+.dn{width:118px;min-height:118px;border-radius:16px;padding:10px 8px;text-align:center;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.05);transition:transform .5s cubic-bezier(.3,1.6,.5,1),box-shadow .5s,background .5s;transform-origin:bottom left;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.dn .e{font-size:28px}.dn b{font-size:13px;line-height:1.25}
+.dn.lit{background:linear-gradient(160deg,rgba(248,113,113,.28),rgba(250,204,21,.16));box-shadow:0 0 28px rgba(248,113,113,.35);transform:rotate(7deg) translateY(2px)}
+.dn.sel{outline:2px solid var(--good)}
+.dar{color:var(--dim);font-size:22px}
+.dinfo{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.dinfo .glass{padding:14px}.dinfo h4{font-size:12px;color:var(--good);margin-bottom:5px;letter-spacing:.05em}.dinfo p{font-size:13.5px}
+
+/* future / sliders */
+.slidebox{margin:8px 0 16px}
+.slidebox .row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.slidebox .row b{color:var(--good)}
+input[type=range]{width:100%;accent-color:#22c55e;cursor:pointer}
+.ticks{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-top:3px}
+.cmp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.cmp div{text-align:center;padding:14px 8px;border-radius:14px;background:rgba(0,0,0,.22)}
+.cmp b{font-family:Sora;font-size:28px;display:block}.cmp span{font-size:12px;color:var(--mut)}
+.quote{margin-top:16px;font-family:Sora;font-size:18px;color:var(--good)}
+
+/* actions */
+.act{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:14px;margin-bottom:10px}
+.act .n{width:34px;height:34px;border-radius:50%;background:rgba(74,222,128,.16);color:var(--good);display:grid;place-items:center;font-weight:800;font-family:Sora}
+.act b{display:block}.act .m{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pill{font-size:11.5px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--mut)}
+
+/* impact */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.stat{padding:16px}.stat .ic{font-size:22px}.stat b{display:block;font-family:Sora;font-size:22px;margin:4px 0 2px}.stat span{font-size:12.5px;color:var(--mut)}
+.pend{color:var(--dim)!important;font-size:14px!important}
+
+/* community/planner */
+.feed{max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.feed .it{background:rgba(0,0,0,.22);padding:10px 12px;border-radius:12px;font-size:13.5px}
+.form{display:grid;gap:9px}
+.form select,.form textarea,.form input{background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+.plist{display:flex;flex-direction:column;gap:8px}
+.plist button{display:flex;justify-content:space-between;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;text-align:left}
+.plist button:hover{border-color:var(--good)}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pstats .glass{padding:14px}.pstats b{font-family:Sora;font-size:26px;display:block}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:500;font-size:12px}
+.tbl{overflow-x:auto}
+
+/* final */
+.final{text-align:center;padding:90px 0 60px}
+.final .steps{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:20px 0}
+.final .steps span{padding:8px 16px;border-radius:99px;background:rgba(74,222,128,.10);border:1px solid rgba(74,222,128,.3);font-weight:700}
+.final h2{font-size:clamp(28px,4.4vw,52px);margin:16px 0}
+footer{text-align:center;color:var(--dim);font-size:12.5px;padding:30px 20px 100px;border-top:1px solid var(--line)}
+
+/* assistant */
+#aiBtn{position:fixed;right:20px;bottom:20px;z-index:1100;border:0;border-radius:99px;padding:13px 20px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#4ade80,#38bdf8);color:#03170d;box-shadow:0 10px 34px rgba(0,0,0,.4)}
+#aiPanel{position:fixed;right:20px;bottom:76px;width:min(370px,calc(100vw - 32px));height:min(520px,70vh);z-index:1100;display:none;flex-direction:column;background:#0b1e15;border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#aiPanel.open{display:flex}
+#aiPanel header{padding:13px 16px;border-bottom:1px solid var(--line);font-family:Sora;font-weight:700}
+#aiPanel header small{display:block;font-family:'DM Sans';font-weight:400;color:var(--mut);font-size:11.5px}
+#aiLog{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px}
+.msg{padding:9px 12px;border-radius:12px;font-size:13.5px;max-width:92%;white-space:pre-line}
+.msg.u{align-self:flex-end;background:rgba(74,222,128,.2)}.msg.a{background:rgba(255,255,255,.07)}
+#aiChips{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px}
+#aiForm{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+#aiForm input{flex:1;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+
+/* demo caption + modal */
+#cap{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:1200;display:none;max-width:min(680px,92vw);background:rgba(3,20,12,.95);border:1px solid var(--good);border-radius:16px;padding:14px 18px;text-align:center;box-shadow:0 14px 50px rgba(0,0,0,.6)}
+#cap b{color:var(--good);font-family:Sora}#cap button{margin-left:10px}
+#modal{position:fixed;inset:0;z-index:1300;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:16px}
+#modal.open{display:flex}
+#modal .box{background:#0b1e15;border:1px solid var(--line);border-radius:18px;width:min(760px,100%);max-height:90vh;overflow:auto;padding:24px}
+#modal h3{font-size:22px;margin-bottom:4px}#modal h4{margin:16px 0 4px;color:var(--good);font-size:14px}#modal p,#modal li{font-size:14px;color:#cfe3d8}#modal ul{margin-left:18px}
+
+@media(max-width:1000px){
+  .mapwrap,.grid2{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .dinfo{grid-template-columns:1fr 1fr}
+}
+@media(max-width:820px){
+  #side{width:auto;right:0;bottom:auto;height:auto;flex-direction:row;padding:8px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--line);gap:2px}
+  #side .brand,#side .grow{display:none}
+  #side a{white-space:nowrap;padding:8px 10px;font-size:13px}
+  .demo-btn{margin:0 0 0 6px;white-space:nowrap;padding:8px 12px}
+  main{margin-left:0;padding-top:52px}
+  .live3,.grid3,.pstats{grid-template-columns:1fr}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .meters{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+  #map{height:440px}
+  .dinfo{grid-template-columns:1fr}
+  .gaugeRow{flex-direction:column;align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<canvas id="atmos" aria-hidden="true"></canvas>
+
+<nav id="side" aria-label="Main navigation">
+  <div class="brand"><i>🌱</i>GeoRoot</div>
+  <a href="#overview" data-n="overview">🌍 Overview</a>
+  <a href="#climate-map" data-n="climate-map">🗺 Climate Map</a>
+  <a href="#tree-intel" data-n="tree-intel">🌱 Tree Intelligence</a>
+  <a href="#water-intel" data-n="water-intel">💧 Water Intelligence</a>
+  <a href="#climate-risk" data-n="climate-risk">🔥 Climate Risk</a>
+  <a href="#domino" data-n="domino">🌎 Climate Domino</a>
+  <a href="#future" data-n="future">🔮 Future Simulator</a>
+  <a href="#impact" data-n="impact">📊 Impact</a>
+  <a href="#community" data-n="community">👥 Community</a>
+  <a href="#planner" data-n="planner">🏛 Planner</a>
+  <a href="#transparency" data-n="transparency">📡 How GeoRoot Knows</a>
+  <a href="#" id="navAI">🤖 GeoRoot AI</a>
+  <div class="grow"></div>
+  <button class="demo-btn" id="demoBtn">🚀 Demo mode</button>
+</nav>
+
+<main>
+<!-- HERO -->
+<header class="hero" id="overview">
+  <h1>GEOROOT</h1>
+  <p class="tagline">Read the land. Predict the climate. Grow the future.</p>
+  <p class="sub">AI-powered climate intelligence for smarter tree planting, water management and urban resilience.</p>
+  <div class="cta">
+    <a class="btn p" href="#climate-map" id="ctaAnalyse">Analyse my area →</a>
+    <button class="btn s" id="ctaDemo">Explore demo →</button>
+  </div>
+  <div class="live3" aria-live="polite">
+    <div class="glass"><small>🌳 Trees planned (per hectare)</small><b id="hTrees">–</b><small id="hTreesS" class="dim"></small></div>
+    <div class="glass"><small>💧 Water potential (100 m² roof)</small><b id="hWater">–</b><small id="hWaterS" class="dim"></small></div>
+    <div class="glass"><small>🌡 Climate risk</small><b id="hRisk">–</b><small id="hRiskS" class="dim"></small></div>
+  </div>
+  <div class="path" aria-label="Product story">
+    <span>Read the land</span><span>Understand the climate</span><span>Find the risk</span><span>Choose the tree</span><span>Manage the water</span><span>Plan for the future</span>
+  </div>
+</header>
+
+<!-- MAP -->
+<section class="blk" id="climate-map">
+  <div class="hd"><h2>Click anywhere. Get a climate read of that ground.</h2>
+  <p>Coloured cells are a modelled suitability grid. The clicked point is enriched with live weather from Open-Meteo where available. Every value carries a data-type tag.</p></div>
+  <div class="mapwrap">
+    <div class="glass">
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Search a place, e.g. Jaipur" aria-label="Search location">
+        <button class="btn s sm" id="qGo">Search</button>
+        <button class="btn s sm" id="locMe">📍 My location</button>
+      </div>
+      <div id="map" role="application" aria-label="Interactive climate map"></div>
+      <div class="legend" id="legend"></div>
+      <div class="chips" id="sampleChips"></div>
+    </div>
+    <div class="glass rep" aria-live="polite">
+      <h3>GEOROOT AI SITE REPORT</h3>
+      <div class="loc" id="rLoc">Select a location</div>
+      <div class="small muted" id="rCoord"></div>
+      <div class="gaugeRow">
+        <div class="gauge" id="g1"></div>
+        <div><span class="verdict" id="rVerdict"></span><p class="small muted" style="margin-top:8px" id="rNote"></p></div>
+      </div>
+      <div class="tiles" id="rTiles"></div>
+      <p class="why" id="rWhy"></p>
+    </div>
+  </div>
+  <div class="story"><h3>SITE STORY</h3><p id="storyTxt">Pick a place on the map to read its climate story.</p></div>
+</section>
+
+<!-- TREES -->
+<section class="blk" id="tree-intel">
+  <div class="hd"><h2>The right tree for this exact spot.</h2>
+  <p>Species are ranked against this site's heat, drought, flood and sunlight profile. The list is tuned to tropical and subtropical South Asia, so confirm with local forestry guidance elsewhere.</p></div>
+  <div class="treeGrid" id="treeGrid"></div>
+</section>
+
+<!-- WATER -->
+<section class="blk" id="water-intel">
+  <div class="hd"><h2>Catch the rain before it leaves.</h2>
+  <p>Prototype estimates for rainwater harvesting and recharge at the selected site.</p></div>
+  <div class="glass">
+    <div class="flow" aria-label="Water pathway"><div class="st">🌧 Rain</div><span class="ar">→</span><div class="st">🏠 Collection</div><span class="ar">→</span><div class="st">🛢 Storage</div><span class="ar">→</span><div class="st">⬇ Recharge</div><span class="ar">→</span><div class="st">🌳 Tree</div></div>
+    <div class="grid2">
+      <div>
+        <div class="slidebox"><div class="row"><span>Roof / catchment area</span><b id="roofTxt">100 m²</b></div><input type="range" id="roof" min="20" max="1000" step="10" value="100" aria-label="Catchment area"></div>
+        <div class="tiles" id="wTiles"></div>
+        <p class="small dim" style="margin-top:10px" id="wNote"></p>
+      </div>
+      <div><h4 style="margin-bottom:8px">Recommended interventions</h4><div class="iv" id="ivList" style="margin-top:0;grid-template-columns:1fr"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- RISK -->
+<section class="blk" id="climate-risk">
+  <div class="hd"><h2>Climate Adversity Centre.</h2>
+  <p>Seven risk meters combine into one resilience score. Temperature, humidity, soil moisture and cloud cover come from live weather when available. The risk indices are modelled.</p></div>
+  <div class="grid2">
+    <div class="glass"><div class="meters" id="meters"></div></div>
+    <div class="glass" style="text-align:center">
+      <div class="gauge" id="g2" style="margin:0 auto"></div>
+      <h3 style="margin-top:10px">Climate resilience score</h3>
+      <p class="muted" style="margin-top:8px" id="resTxt"></p>
+      <p class="small dim" style="margin-top:8px"><span class="tag t-LIVE">LIVE</span> inputs · <span class="tag t-MODELLED">MODELLED</span> indices</p>
+    </div>
+  </div>
+</section>
+
+<!-- DOMINO -->
+<section class="blk" id="domino">
+  <div class="hd"><h2>Climate Domino: how one problem topples the next.</h2>
+  <p>Tap any domino, or play the cascade. Colour intensity reflects how strongly this site is exposed.</p></div>
+  <div class="glass">
+    <div class="dom" id="domChain"></div>
+    <div style="text-align:center;margin-bottom:16px"><button class="btn p sm" id="domPlay">▶ Play cascade</button> <button class="btn s sm" id="domReset">Reset</button></div>
+    <div class="dinfo" id="domInfo"></div>
+  </div>
+</section>
+
+<!-- FUTURE -->
+<section class="blk" id="future">
+  <div class="hd"><h2>What will this place look like in the future?</h2>
+  <p>Scenario modelling, not prediction. It shows how this site's plantability shifts under a uniform warming offset.</p></div>
+  <div class="grid2">
+    <div class="glass">
+      <div class="slidebox"><div class="row"><span>Warming scenario</span><b id="dTtxt">Today</b></div>
+      <input type="range" id="dT" min="0" max="5" step="1" value="0" aria-label="Warming scenario"><div class="ticks"><span>Today</span><span>+1°C</span><span>+2°C</span><span>+3°C</span><span>+4°C</span><span>+5°C</span></div></div>
+      <div class="meters" id="fMeters" style="grid-template-columns:1fr"></div>
+      <div class="cmp" id="cmp"></div>
+      <p class="quote">Build for the climate your trees will experience.</p>
+    </div>
+    <div class="glass">
+      <h3 style="margin-bottom:4px">🌡 Cool this area</h3>
+      <p class="small muted" style="margin-bottom:12px">Raise tree cover and see an illustrative change. Modelled scenario.</p>
+      <div class="slidebox"><div class="row"><span>Green cover (current <span id="gcCur">–</span>%)</span><b id="gcTxt">–</b></div><input type="range" id="gc" min="10" max="60" step="1" value="20" aria-label="Green cover"><div class="ticks"><span>10%</span><span>20%</span><span>30%</span><span>40%</span><span>50%</span><span>60%</span></div></div>
+      <div class="tiles" id="coolTiles" style="grid-template-columns:repeat(2,1fr)"></div>
+      <h3 style="margin:22px 0 10px">What should we do first?</h3>
+      <div id="actions"></div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section class="blk" id="impact">
+  <div class="hd"><h2>Impact, without inflated numbers.</h2>
+  <p>Planning estimates for the selected site. Anything we cannot measure says so.</p></div>
+  <div class="glass" style="margin-bottom:14px"><div class="slidebox" style="margin:0"><div class="row"><span>Planning area</span><b id="haTxt">1 ha</b></div><input type="range" id="ha" min="0.5" max="20" step="0.5" value="1" aria-label="Planning area in hectares"></div></div>
+  <div class="stats" id="stats"></div>
+</section>
+
+<!-- COMMUNITY -->
+<section class="blk" id="community">
+  <div class="hd"><h2>Community mode.</h2><p>Neighbours can request trees, report problems and adopt a zone. This prototype stores entries only in your browser.</p></div>
+  <div class="grid2">
+    <div class="glass">
+      <h3 style="margin-bottom:10px">Take action here</h3>
+      <div class="form">
+        <select id="cType" aria-label="Type"><option>Request a tree-planting location</option><option>Report a failed tree</option><option>Report a watering problem</option></select>
+        <textarea id="cNote" rows="2" placeholder="Add a short note (optional)"></textarea>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn p sm" id="cSubmit">Submit for this location</button><button class="btn s sm" id="cAdopt">Adopt this zone 🌱</button></div>
+      </div>
+      <div class="pstats" style="margin:16px 0 0"><div class="glass"><b id="cN1">0</b><span class="small muted">Requests & reports</span></div><div class="glass"><b id="cN2">0</b><span class="small muted">Adopted zones</span></div><div class="glass"><b id="cN3">0</b><span class="small muted">Planting logged</span></div></div>
+      <div class="feed" id="feed"><div class="it muted">Nothing logged yet. Submit the first request.</div></div>
+    </div>
+    <div class="glass">
+      <h3 style="margin-bottom:4px">Recommended planting zones in view</h3>
+      <p class="small muted" style="margin-bottom:10px">Highest-scoring cells on the current map view. <span class="tag t-DEMO">DEMO</span> grid.</p>
+      <div class="plist" id="topZones"></div>
+      <h3 style="margin:18px 0 4px">Nearby green zones</h3>
+      <div class="plist" id="greenZones"></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANNER -->
+<section class="blk" id="planner">
+  <div class="hd"><h2>Planner and municipal mode.</h2><p>A portfolio view of the sites you have analysed and the zones currently in map view.</p></div>
+  <div class="pstats" style="grid-template-columns:repeat(3,1fr)" id="pStats"></div>
+  <div class="grid2">
+    <div class="glass"><h3 style="margin-bottom:8px">Analysed sites</h3><div class="tbl"><table><thead><tr><th>Site</th><th>Score</th><th>Verdict</th><th>Top tree</th></tr></thead><tbody id="pTable"><tr><td colspan="4" class="muted">No sites analysed yet.</td></tr></tbody></table></div></div>
+    <div class="glass"><h3 style="margin-bottom:8px">Recommended species across analysed sites</h3><div id="pSpecies" class="muted small">–</div>
+      <button class="btn p" style="margin-top:18px" id="genReport">Generate site report</button></div>
+  </div>
+</section>
+
+<!-- TRANSPARENCY -->
+<section class="blk" id="transparency">
+  <div class="hd"><h2>How GeoRoot knows.</h2><p>Each metric is tagged so you can tell measured weather from model output, user input and demo data.</p></div>
+  <div class="grid2">
+    <div class="glass"><div class="tbl"><table><thead><tr><th>Metric</th><th>Type</th><th>Source</th></tr></thead><tbody id="trBody"></tbody></table></div></div>
+    <div class="glass">
+      <div class="plist" style="gap:12px">
+        <div>📡 <b>Sensor data</b><p class="small muted">No physical sensors are connected. Soil moisture is Open-Meteo's modelled top-soil value.</p></div>
+        <div>🌦 <b>Weather data</b><p class="small muted">Open-Meteo forecast and archive APIs (free, no key). If a call fails, GeoRoot falls back to a latitude-based model and says so.</p></div>
+        <div>🗺 <b>Map data</b><p class="small muted">Leaflet with OpenStreetMap tiles. Land type and green cover are demo values, not satellite land cover.</p></div>
+        <div>🌱 <b>Ecological data</b><p class="small muted">Species traits are hand-curated approximations for a prototype.</p></div>
+        <div>🤖 <b>AI analysis</b><p class="small muted">Scores and text come from transparent rules on this page. The assistant does not call a language model.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="blk final">
+  <h2 class="display">From data to action.</h2>
+  <div class="steps"><span>Sense</span><span>Analyse</span><span>Predict</span><span>Recommend</span><span>Act</span><span>Learn</span></div>
+  <p class="quote" style="font-size:24px">Every tree deserves the right place.</p>
+  <p style="margin-top:28px" class="display"><b>GEOROOT</b><br><span class="muted" style="font-size:15px">AI Climate Intelligence · Team-Ambit</span></p>
+</section>
+<footer>Prototype. Live values come from Open-Meteo when reachable; risk indices, land cover, community entries and impact figures are modelled, demo or illustrative.</footer>
+</main>
+
+<button id="aiBtn" aria-expanded="false">🤖 Ask GeoRoot AI</button>
+<div id="aiPanel" role="dialog" aria-label="GeoRoot AI assistant">
+  <header>Ask GeoRoot AI<small>Answers from this dashboard's data using built-in rules. Not a live language model.</small></header>
+  <div id="aiLog"></div>
+  <div id="aiChips"></div>
+  <form id="aiForm"><input id="aiIn" placeholder="Ask about this site…" aria-label="Question"><button class="btn p sm" type="submit">Send</button></form>
+</div>
+<div id="cap" role="status"></div>
+<div id="modal" role="dialog" aria-modal="true"><div class="box" id="modalBox"></div></div>
+
+<script>
+/* ========== helpers ========== */
+const $=id=>document.getElementById(id);
+const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function h2(x,y,s){let h=Math.sin(x*127.1+y*311.7+s*74.7)*43758.5453;return h-Math.floor(h)}
+function vn(x,y,s){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+  const a=h2(xi,yi,s),b=h2(xi+1,yi,s),c=h2(xi,yi+1,s),d=h2(xi+1,yi+1,s);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+const nz=(la,ln,s)=>vn(la*90,ln*90,s)*.65+vn(la*270,ln*270,s+9)*.35;
+const st=v=>clamp((v-.22)/.56,0,1);
+function tween(el,to,dec=0,pre='',suf=''){const from=el._v||0;el._v=to;const t0=performance.now();
+  (function f(t){const p=Math.min(1,(t-t0)/700),v=from+(to-from)*(1-Math.pow(1-p,3));el.textContent=pre+v.toFixed(dec)+suf;if(p<1)requestAnimationFrame(f)})(t0)}
+const colFor=v=>v<35?'var(--good)':v<65?'var(--mod)':'var(--bad)';
+const tagHtml=t=>`<span class="tag t-${t}">${t==='USER'?'USER INPUT':t}</span>`;
+
+/* ========== climate model (prototype) ========== */
+const baseTemp=lat=>27.5-.32*Math.max(0,Math.abs(lat)-20)+(Math.abs(lat)>15&&Math.abs(lat)<42?1.5:0);
+const baseRain=lat=>600+1700*Math.exp(-Math.pow(lat/9,2));
+function baseSite(lat,lng){
+  const green=.06+.8*st(nz(lat,lng,1));
+  const imperv=clamp(.95-green*.9+.25*(st(nz(lat,lng,2))-.5),.05,.95);
+  const floodF=st(nz(lat,lng,4)), aqF=st(nz(lat,lng,8));
+  const land=green>.55?'Park / vegetated':imperv>.7?'Dense built-up':imperv<.3?'Open ground':'Mixed residential';
+  return{lat,lng,green,imperv,floodF,aqF,land,
+    temp:baseTemp(lat)+(imperv-.4)*3+anchor,
+    hum:35+45*st(nz(lat,lng,6)),
+    soil:25+50*st(nz(lat,lng,3))+green*10,
+    sun:55+40*st(nz(lat,lng,5)),
+    rain:baseRain(lat)*(.8+.4*st(nz(lat,lng,7))),
+    src:{temp:'MODELLED',hum:'MODELLED',soil:'MODELLED',sun:'MODELLED',rain:'MODELLED',land:'DEMO',green:'DEMO',coord:'USER'}};
+}
+let anchor=0; // shifts modelled grid toward live temperature at selected site
+function evaluate(s,dT=0,greenOv=null){
+  const green=greenOv!=null?greenOv:s.green;
+  const imperv=clamp(s.imperv-(green-s.green)*.8,.03,.97);
+  const t=s.temp+dT, soil=clamp(s.soil-4*dT+(green-s.green)*20), sun=s.sun, rain=s.rain;
+  const heat=clamp((t-27)*7+imperv*35-green*30+15);
+  const drought=clamp((55-soil)*1.6+(t-24)*2.2+(900-rain)/900*15);
+  const flood=clamp(imperv*45+rain/1600*35+s.floodF*20);
+  const tStress=clamp(Math.max(0,t-28)*9+Math.max(0,12-t)*6);
+  const veg=clamp((drought*.5+heat*.5)*(1-.3*green));
+  const aq=clamp(25+imperv*40+s.aqF*20-green*15+(t>32?8:0));
+  const ext=clamp((t+7-38)*12+imperv*15);
+  const resil=clamp(100-(.2*heat+.2*drought+.15*flood+.1*tStress+.15*veg+.1*aq+.1*ext));
+  const tS=t>=18&&t<=32?100:clamp(100-(t<18?18-t:t-32)*6);
+  const sS=soil>=40&&soil<=80?100:soil<40?soil/40*100:clamp(100-(soil-80)*3);
+  const uS=sun>=50&&sun<=90?100:sun<50?sun/50*100:clamp(100-(sun-90)*3);
+  const fit=.3*tS+.4*sS+.3*uS;
+  const score=Math.round(.6*fit+.4*resil);
+  return{t,soil,sun,hum:s.hum,rain,green,imperv,heat,drought,flood,tStress,veg,aq,ext,resil,fit,score,
+    verdict:score>=75?'PLANT':score>=50?'IMPROVE SITE':'AVOID FOR NOW'};
+}
+/* ========== trees ========== */
+const TREES=[
+ {n:'Neem',sci:'Azadirachta indica',water:'Low',heat:92,dr:90,fl:40,sun:85,air:4,nat:'Native (South Asia)',eco:'Deep shade, pest-repelling, supports birds and pollinators'},
+ {n:'Khejri',sci:'Prosopis cineraria',water:'Very low',heat:98,dr:98,fl:30,sun:90,air:3,nat:'Native (arid India)',eco:'Fixes nitrogen and thrives in hot, dry ground'},
+ {n:'Pongamia',sci:'Pongamia pinnata',water:'Low–medium',heat:80,dr:75,fl:60,sun:80,air:4,nat:'Native (South Asia)',eco:'Dense canopy, nitrogen-fixing, tolerates salty soil'},
+ {n:'Arjun',sci:'Terminalia arjuna',water:'Medium–high',heat:70,dr:45,fl:85,sun:75,air:4,nat:'Native (South Asia)',eco:'Stabilises banks and handles seasonal waterlogging'},
+ {n:'Jamun',sci:'Syzygium cumini',water:'Medium',heat:75,dr:55,fl:80,sun:75,air:4,nat:'Native (South Asia)',eco:'Fruit for wildlife, good in moist and low-lying ground'},
+ {n:'Peepal',sci:'Ficus religiosa',water:'Medium',heat:80,dr:65,fl:55,sun:70,air:5,nat:'Native (South Asia)',eco:'Large canopy, strong cooling and habitat value'},
+ {n:'Amaltas',sci:'Cassia fistula',water:'Low–medium',heat:85,dr:75,fl:40,sun:85,air:3,nat:'Native (South Asia)',eco:'Light shade, flowers feed pollinators'},
+ {n:'Gulmohar',sci:'Delonix regia',water:'Medium',heat:75,dr:60,fl:40,sun:85,air:3,nat:'Non-native (Madagascar)',eco:'Wide shade, showy, but limited native wildlife value'}
+];
+const lvl=v=>v>=90?'Very high':v>=75?'High':v>=55?'Moderate':'Low';
+function treeFit(t,m){
+  let f=100-m.heat*(1-t.heat/120)*.5-m.drought*(1-t.dr/110)*.5-m.flood*(1-t.fl/110)*.3-Math.abs(m.sun-t.sun)*.15+(m.imperv>.6?t.air*1.5:0)-(t.nat.startsWith('Non')?3:0);
+  return Math.round(clamp(f,20,98));
+}
+function rankTrees(m){return TREES.map(t=>({...t,fit:treeFit(t,m)})).sort((a,b)=>b.fit-a.fit)}
+function treeWhy(t,m){
+  const b=[];
+  if(m.heat>50)b.push(`heat stress here is elevated (${Math.round(m.heat)}), and ${t.n} has ${lvl(t.heat).toLowerCase()} heat tolerance`);
+  if(m.drought>45)b.push(`drought exposure is ${Math.round(m.drought)}/100 and its drought tolerance is ${lvl(t.dr).toLowerCase()}`);
+  if(m.flood>55)b.push(`runoff risk is notable, and its flood tolerance is ${lvl(t.fl).toLowerCase()}`);
+  if(m.imperv>.6)b.push('the surroundings are largely paved, where its air-quality benefit counts');
+  if(!b.length)b.push(`sunlight (${Math.round(m.sun)}%) and moisture (${Math.round(m.soil)}%) sit close to what it prefers`);
+  return b.slice(0,2).join(', and ')+'.';
+}
+
+/* ========== water ========== */
+function waterCalc(s,m,roof){
+  const litres=Math.round(m.rain*roof*.8), runoff=clamp(m.imperv*80+m.rain/40);
+  const perm=clamp((1-m.imperv)*70+m.soil*.3), recharge=clamp(perm*.7+(m.drought>40?20:0)), collect=clamp(m.imperv*70+30);
+  const iv=[];
+  if(m.imperv>.5)iv.push(['🏠 Rooftop harvesting','Paved and built surfaces shed a lot of water. Capture it at the roof.',m.imperv*100]);
+  if(m.drought>35&&perm>40)iv.push(['💧 Recharge pit','Dry soil with reasonable permeability suits pit recharge.',m.drought+perm/2]);
+  if(m.flood>50)iv.push(['🌊 Bioswale','Slow and filter runoff along roads and edges.',m.flood]);
+  if(m.green<.4)iv.push(['🌱 Rain garden','A planted depression to soak up storm runoff and feed new trees.',(1-m.green)*80]);
+  if(perm>55)iv.push(['🕳 Percolation pit','Permeable ground allows direct infiltration.',perm]);
+  iv.push(['🌿 Vegetated drainage','Replace hard channels with planted drains to cool and slow water.',40]);
+  iv.sort((a,b)=>b[2]-a[2]);
+  return{litres,runoff,recharge,collect,iv:iv.slice(0,3)};
+}
+
+/* ========== state ========== */
+let SITE=null, WX=null, M=null, RANK=null, history=[], cur={dT:0};
+const SAMPLES=[['Rohini',28.7041,77.1025],['Central Delhi',28.6304,77.2177],['East Delhi',28.6280,77.2770],['South Delhi',28.5355,77.2505]];
+
+/* ========== map ========== */
+const map=L.map('map',{zoomControl:true}).setView([28.6139,77.2090],11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap contributors'}).addTo(map);
+const LAYERS={
+ suit:{name:'🌳 Tree suitability',f:(c)=>c.ev.score,color:v=>v>=75?'#22c55e':v>=62?'#a3e635':v>=50?'#facc15':'#ef4444',leg:[['#22c55e','Excellent'],['#a3e635','Good'],['#facc15','Moderate'],['#ef4444','Poor']]},
+ rain:{name:'💧 Rainwater potential',f:c=>clamp(c.s.imperv*60+c.s.rain/40),color:v=>`rgba(56,189,248,${.12+v/140})`,leg:[['#38bdf8','Higher = more collectable water']]},
+ heat:{name:'🔥 Urban heat',f:c=>c.ev.heat,color:v=>v<35?'rgba(250,204,21,.25)':v<65?'rgba(251,146,60,.45)':'rgba(239,68,68,.6)',leg:[['#facc15','Low'],['#fb923c','Elevated'],['#ef4444','Heat-stress zone']]},
+ flood:{name:'🌧 Flood / runoff risk',f:c=>c.ev.flood,color:v=>v<40?'rgba(56,189,248,.12)':v<65?'rgba(99,102,241,.4)':'rgba(139,92,246,.65)',leg:[['#6366f1','Drainage attention'],['#8b5cf6','High runoff']]},
+ green:{name:'🌱 Existing green cover',f:c=>c.s.green*100,color:v=>`rgba(74,222,128,${.08+v/150})`,leg:[['#4ade80','Denser = more vegetation (demo)']]},
+ sun:{name:'☀️ Solar exposure',f:c=>c.s.sun,color:v=>`rgba(250,204,21,${.06+(v-50)/100})`,leg:[['#facc15','Brighter = more sunlight']]}
+};
+const groups={};Object.keys(LAYERS).forEach(k=>groups[k]=L.layerGroup());
+const ctl={};Object.keys(LAYERS).forEach(k=>ctl[LAYERS[k].name]=groups[k]);
+L.control.layers(null,ctl,{collapsed:window.innerWidth<820}).addTo(map);
+groups.suit.addTo(map);
+let hi=null, mk=null;
+function step(){const z=map.getZoom();return z>=14?.003:z>=13?.005:z>=12?.008:z>=11?.012:.03}
+function cells(){
+  const b=map.getBounds().pad(.05), d=step(), out=[];
+  const la0=Math.floor(b.getSouth()/d)*d, ln0=Math.floor(b.getWest()/d)*d;
+  for(let la=la0;la<b.getNorth();la+=d)for(let ln=ln0;ln<b.getEast();ln+=d){
+    const c=[+(la+d/2).toFixed(5),+(ln+d/2).toFixed(5)], s=baseSite(c[0],c[1]);
+    out.push({la,ln,d,s,ev:evaluate(s)});
+    if(out.length>900)return out;}
+  return out;
+}
+let CELLS=[];
+function drawGrid(){
+  CELLS=cells();
+  Object.keys(groups).forEach(k=>{
+    groups[k].clearLayers();
+    if(!map.hasLayer(groups[k]))return;
+    CELLS.forEach(c=>{const v=LAYERS[k].f(c);
+      L.rectangle([[c.la,c.ln],[c.la+c.d,c.ln+c.d]],{stroke:false,fillColor:LAYERS[k].color(v),fillColor:LAYERS[k].color(v),fillOpacity:k==='suit'?.38:1,interactive:false}).addTo(groups[k]);});
+  });
+  updateLegend();updatePlanner();updateZoneLists();
+}
+function updateLegend(){
+  const on=Object.keys(LAYERS).filter(k=>map.hasLayer(groups[k]));
+  $('legend').innerHTML=on.length?on.map(k=>`<span><b>${LAYERS[k].name}</b> `+LAYERS[k].leg.map(l=>`<span><i style="background:${l[0]}"></i>${l[1]}</span>`).join(' ')+'</span>').join('<br>'):'<span>Turn on a layer with the layer control.</span>';
+}
+map.on('moveend',drawGrid);
+map.on('overlayadd overlayremove',drawGrid);
+map.on('click',e=>setSite(e.latlng.lat,e.latlng.lng,{}));
+SAMPLES.forEach(([n,la,ln])=>{const b=document.createElement('button');b.className='chip';b.textContent='Sample: '+n;b.onclick=()=>{map.flyTo([la,ln],13,{duration:1});setSite(la,ln,{name:n})};$('sampleChips').appendChild(b)});
+
+/* ========== weather (Open-Meteo, graceful fallback) ========== */
+async function getJSON(url){const c=new AbortController(),t=setTimeout(()=>c.abort(),6000);try{const r=await fetch(url,{signal:c.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}}
+async function fetchWeather(lat,lng){
+  const out={};
+  try{
+    const j=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,cloud_cover&hourly=soil_moisture_0_to_1cm&forecast_days=1&timezone=auto`);
+    if(j.current){out.temp=j.current.temperature_2m;out.hum=j.current.relative_humidity_2m;out.sun=clamp(100-.7*j.current.cloud_cover)}
+    const sm=(j.hourly&&j.hourly.soil_moisture_0_to_1cm||[]).filter(v=>v!=null);
+    if(sm.length)out.soil=clamp(sm.reduce((a,b)=>a+b,0)/sm.length/.45*100);
+  }catch(e){}
+  try{
+    const y=new Date().getFullYear()-1;
+    const j=await getJSON(`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lng}&start_date=${y}-01-01&end_date=${y}-12-31&daily=precipitation_sum&timezone=auto`);
+    const p=(j.daily&&j.daily.precipitation_sum||[]).filter(v=>v!=null);
+    if(p.length>300)out.rain=Math.round(p.reduce((a,b)=>a+b,0));
+  }catch(e){}
+  return out;
+}
+
+/* ========== set site ========== */
+async function setSite(lat,lng,opt){
+  anchor=0;
+  const b=baseSite(lat,lng);
+  SITE=b;SITE.name=opt.name||null;
+  if(mk)map.removeLayer(mk);
+  mk=L.marker([lat,lng]).addTo(map);
+  const d=step();
+  if(hi)map.removeLayer(hi);
+  hi=L.rectangle([[Math.floor(lat/d)*d,Math.floor(lng/d)*d],[Math.floor(lat/d)*d+d,Math.floor(lng/d)*d+d]],{color:'#fff',weight:2,fill:false,interactive:false}).addTo(map);
+  $('rLoc').textContent=opt.name||'Analysing…';
+  render();
+  const w=await fetchWeather(lat,lng);
+  if(SITE.lat!==lat||SITE.lng!==lng)return;
+  ['temp','hum','soil','sun','rain'].forEach(k=>{if(w[k]!=null){SITE[k]=w[k];SITE.src[k]='LIVE'}});
+  if(w.temp!=null){anchor=w.temp-baseSite(lat,lng).temp;SITE.temp=w.temp;drawGrid()}
+  SITE.wxOK=Object.keys(w).length>0;
+  if(!SITE.name)SITE.name='Selected site ('+lat.toFixed(3)+', '+lng.toFixed(3)+')';
+  render(true);
+}
+
+/* ========== gauge & meters ========== */
+function gaugeInit(el){el.innerHTML='<svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="54"/><circle class="fg" cx="60" cy="60" r="54"/></svg><div><b>0</b><small></small></div>'}
+function gaugeSet(el,v,label){const fg=el.querySelector('.fg');fg.style.strokeDashoffset=339.3*(1-v/100);fg.style.stroke=v>=75?'var(--good)':v>=50?'var(--mod)':'var(--bad)';tween(el.querySelector('b'),v);el.querySelector('small').textContent=label||''}
+gaugeInit($('g1'));gaugeInit($('g2'));
+function meterHtml(id,label,v){return`<div class="meter"><div class="top"><span>${label}</span><b id="${id}v">0</b></div><div class="bar"><i id="${id}b"></i></div></div>`}
+function meterSet(id,v){const b=$(id+'b');b.style.width=v+'%';b.style.background=colFor(v);tween($(id+'v'),Math.round(v))}
+const RISKS=[['heat','🔥 Heat stress'],['drought','💧 Drought risk'],['flood','🌧 Flood risk'],['tStress','🌡 Temperature stress'],['veg','🌱 Vegetation stress'],['aq','💨 Air-quality risk'],['ext','☀️ Extreme heat exposure']];
+$('meters').innerHTML=RISKS.map(r=>meterHtml('m_'+r[0],r[1])).join('');
+const FM=[['score','🌳 Plantability',1],['heat','🔥 Heat stress'],['drought','💧 Drought risk'],['wat','🚰 Water availability',1],['resil','🛡 Resilience',1]];
+$('fMeters').innerHTML=FM.map(r=>meterHtml('f_'+r[0],r[1])).join('');
+function meterSetGood(id,v){const b=$(id+'b');b.style.width=v+'%';b.style.background=v>=65?'var(--good)':v>=40?'var(--mod)':'var(--bad)';tween($(id+'v'),Math.round(v))}
+
+/* ========== render ========== */
+function tile(l,v,t){return`<div class="tile"><span>${l}</span><b>${v}</b> ${t?tagHtml(t):''}</div>`}
+function render(){
+  if(!SITE)return;
+  M=evaluate(SITE);RANK=rankTrees(M);
+  const S=SITE,src=S.src;
+  $('rLoc').textContent=S.name||'Analysing…';
+  $('rCoord').innerHTML=`Lat ${S.lat.toFixed(4)} · Lng ${S.lng.toFixed(4)} ${tagHtml('USER')}`;
+  $('rNote').textContent=S.wxOK===false?'Live weather unavailable. Showing modelled values.':S.wxOK?'Live weather applied where tagged LIVE.':'Fetching live weather…';
+  $('rTiles').innerHTML=[
+    tile('Temperature',S.temp.toFixed(1)+'°C',src.temp),tile('Humidity',Math.round(S.hum)+'%',src.hum),tile('Soil moisture',Math.round(S.soil)+'%',src.soil),
+    tile('Sunlight',Math.round(S.sun)+'%',src.sun),tile('Land type',S.land,src.land),tile('Rainfall / yr',Math.round(S.rain)+' mm',src.rain),
+    tile('Heat stress',Math.round(M.heat)+'/100','MODELLED'),tile('Drought exposure',Math.round(M.drought)+'/100','MODELLED'),tile('Green cover',Math.round(S.green*100)+'%',src.green)].join('');
+  gaugeSet($('g1'),M.score,'/ 100');
+  const vc=M.score>=75?'v-plant':M.score>=50?'v-imp':'v-avoid', ic=M.score>=75?'🟢':M.score>=50?'🟡':'🔴';
+  $('rVerdict').className='verdict '+vc;$('rVerdict').textContent=ic+' '+M.verdict;
+  $('rWhy').textContent=whyText();
+  $('storyTxt').textContent=storyText();
+  // hero
+  const treesHa=Math.round(250*M.score/100);
+  tween($('hTrees'),treesHa);$('hTreesS').textContent='at ~6 m spacing, scaled by suitability';
+  const w=waterCalc(S,M,100);tween($('hWater'),w.litres/1000,1,'',' kL/yr');$('hWaterS').textContent='estimate at 80% capture';
+  const risk=Math.round((M.heat+M.drought+M.flood)/3);$('hRisk').textContent=risk<35?'Low':risk<60?'Moderate':'High';$('hRiskS').textContent='avg heat, drought, flood: '+risk+'/100';
+  // trees
+  $('treeGrid').innerHTML=RANK.slice(0,4).map(t=>`<div class="glass tree"><div class="pct">${t.fit}%</div><h3>${t.n}</h3><div class="lat">${t.sci}</div>
+   <dl><dt>💧 Water</dt><dd>${t.water}</dd><dt>☀️ Sun</dt><dd>${t.sun>=80?'Full sun':'Full to part sun'}</dd><dt>🌡 Heat tolerance</dt><dd>${lvl(t.heat)}</dd><dt>🌳 Ecology</dt><dd>${t.eco}</dd><dt>💨 Air quality</dt><dd>${'●'.repeat(t.air)}${'○'.repeat(5-t.air)}</dd><dt>🌿 Status</dt><dd>${t.nat}</dd></dl>
+   <div class="whyt"><b>Why this tree?</b> Here, ${treeWhy(t,M)}</div></div>`).join('');
+  // risk
+  RISKS.forEach(r=>meterSet('m_'+r[0],M[r[0]]));
+  gaugeSet($('g2'),Math.round(M.resil),'/ 100');
+  $('resTxt').textContent=M.resil>=70?'This area shows low to moderate climate stress. Keep tree cover and water retention as they are, and protect existing green space.':M.resil>=50?'This area has moderate climate stress. Increasing tree cover and improving water retention could improve resilience.':'This area is under high climate stress. Cooling, shade and water retention should come before large-scale planting.';
+  renderWater();renderDomino();renderFuture();renderCool();renderActions();renderImpact();renderTransparency();
+  recordHistory();updatePlanner();updateZoneLists();
+}
+function whyText(){
+  const bits=[];
+  if(M.sun>=60)bits.push('strong sunlight');if(M.soil>=45&&M.soil<=80)bits.push('workable soil moisture');else if(M.soil<40)bits.push('low soil moisture');
+  if(M.heat>55)bits.push('high heat stress');if(M.flood>60)bits.push('elevated runoff');
+  const tree=RANK[0];
+  const lead=M.score>=75?'Suitable for planting':M.score>=50?'Plantable after site improvement':'Poor conditions right now';
+  return `${lead}: ${bits.join(', ')||'balanced conditions'}. Best-fit species right now: ${tree.n} (${tree.fit}%). Score = 60% climate fit (temperature, soil moisture, sunlight) + 40% resilience.`;
+}
+function storyText(){
+  const w=waterCalc(SITE,M,100);const f3=evaluate(SITE,3).score;
+  const a=M.score>=75?'currently suitable for tree planting':M.score>=50?'plantable, but the site needs improvement first':'a difficult site for new trees right now';
+  const b=M.heat>60?'high heat stress':M.heat>35?'moderate heat stress':'low heat stress';
+  const c=M.drought>45?'Rainwater recharge is a priority to protect soil moisture.':'Rainwater recharge could still improve long-term soil moisture.';
+  return `This location is ${a}, with ${b}. ${c} Under a +3°C scenario, plantability moves from ${M.score} to ${f3}, so climate-adapted species such as ${RANK[0].n} and ${RANK[1].n} are recommended.`;
+}
+function renderWater(){
+  const roof=+$('roof').value;$('roofTxt').textContent=roof+' m²';
+  const w=waterCalc(SITE,M,roof);
+  $('wTiles').innerHTML=tile('Rainwater potential',(w.litres/1000).toFixed(1)+' kL/yr',SITE.src.rain==='LIVE'?'LIVE':'MODELLED')+tile('Runoff potential',Math.round(w.runoff)+'/100','MODELLED')+tile('Recharge suitability',Math.round(w.recharge)+'/100','MODELLED')+tile('Collection suitability',Math.round(w.collect)+'/100','MODELLED');
+  $('wNote').textContent=`Estimate: ${Math.round(M.rain)} mm/yr × ${roof} m² × 0.8 runoff coefficient. Rainfall is ${SITE.src.rain==='LIVE'?'last calendar year from Open-Meteo archive':'a latitude-based model'}. Not a design calculation.`;
+  $('ivList').innerHTML=w.iv.map(i=>`<div class="glass"><b>${i[0]}</b><p>${i[1]}</p></div>`).join('');
+}
+$('roof').oninput=()=>{if(SITE)renderWater()};
+
+/* domino */
+const DOM=[
+ {e:'🔥',n:'Extreme heat',cause:'Hot air and hard surfaces raise daytime temperatures.',effect:'Soil and leaves lose water faster.',iv:'Shade trees and cool, permeable surfaces.',k:'heat'},
+ {e:'💧',n:'Soil moisture loss',cause:'Evaporation outpaces rainfall and recharge.',effect:'Roots reach dry ground and young trees stall.',iv:'Recharge pits, mulching and rain gardens.',k:'drought'},
+ {e:'🌳',n:'Tree stress',cause:'Heat and thirst together weaken trees.',effect:'Leaf drop, dieback and failed plantings.',iv:'Match drought-tolerant species and water in the first two years.',k:'veg'},
+ {e:'🍂',n:'Less green cover',cause:'Stressed trees lose canopy.',effect:'Less shade and less transpiration cooling.',iv:'Replant with climate-adapted species.',k:'green'},
+ {e:'🏙',n:'Higher urban heat',cause:'Bare and paved ground stores heat.',effect:'Hotter nights and more heat illness risk.',iv:'Add canopy, cool roofs and vegetated drainage.',k:'heat'},
+ {e:'🚰',n:'Higher water demand',cause:'Hotter days raise water need for people and plants.',effect:'Strain on supply, which feeds back into less irrigation.',iv:'Harvest rain and recharge groundwater.',k:'drought'}];
+let domSel=0;
+function domSeverity(d){return d.k==='green'?100-M.green*100:M[d.k]}
+function renderDomino(){
+  $('domChain').innerHTML=DOM.map((d,i)=>`<button class="dn" data-i="${i}" style="background-image:linear-gradient(0deg,rgba(248,113,113,${(domSeverity(d)/250).toFixed(2)}),transparent)"><span class="e">${d.e}</span><b>${d.n}</b><span class="small dim">${Math.round(domSeverity(d))}/100</span></button>`+(i<DOM.length-1?'<span class="dar">→</span>':'')).join('');
+  document.querySelectorAll('.dn').forEach(b=>b.onclick=()=>{domSel=+b.dataset.i;b.classList.add('lit');domInfo()});
+  domInfo();
+}
+function domInfo(){
+  const d=DOM[domSel];document.querySelectorAll('.dn').forEach(b=>b.classList.toggle('sel',+b.dataset.i===domSel));
+  const s=Math.round(domSeverity(d));
+  $('domInfo').innerHTML=[['CAUSE',d.cause],['EFFECT',d.effect],['RISK AT THIS SITE',`${s}/100 — ${s<35?'low':s<65?'moderate':'high'} exposure (modelled).`],['GEOROOT INTERVENTION',d.iv]].map(x=>`<div class="glass"><h4>${x[0]}</h4><p>${x[1]}</p></div>`).join('');
+}
+function domPlay(){
+  domReset();DOM.forEach((d,i)=>setTimeout(()=>{domSel=i;const b=document.querySelector(`.dn[data-i="${i}"]`);if(b)b.classList.add('lit');domInfo()},i*750));
+}
+function domReset(){document.querySelectorAll('.dn').forEach(b=>b.classList.remove('lit'));domSel=0;domInfo()}
+$('domPlay').onclick=domPlay;$('domReset').onclick=domReset;
+
+/* future */
+function renderFuture(){
+  const dT=+$('dT').value;cur.dT=dT;$('dTtxt').textContent=dT?`+${dT}°C`:'Today';
+  const e=evaluate(SITE,dT);
+  meterSetGood('f_score',e.score);meterSet('f_heat',e.heat);meterSet('f_drought',e.drought);
+  meterSetGood('f_wat',clamp(e.soil*.7+Math.min(e.rain,1500)/1500*30));meterSetGood('f_resil',e.resil);
+  const sc=k=>evaluate(SITE,k).score;
+  $('cmp').innerHTML=[0,2,5].map(k=>`<div><span>${k?'+'+k+'°C':'Today'}</span><b style="color:${colFor(100-sc(k))}">${sc(k)}%</b><span>Plantability</span></div>`).join('');
+}
+$('dT').oninput=()=>{if(SITE)renderFuture()};
+/* cooling */
+function renderCool(){
+  const curG=Math.round(SITE.green*100);$('gcCur').textContent=curG;
+  if(!$('gc')._set||$('gc')._site!==SITE.lat+','+SITE.lng){$('gc').value=clamp(curG,10,60);$('gc')._set=1;$('gc')._site=SITE.lat+','+SITE.lng}
+  const g=+$('gc').value;$('gcTxt').textContent=g+'%';
+  const a=evaluate(SITE,0),b=evaluate(SITE,0,g/100);
+  const dt=(g-curG)*-.05;
+  const wreq=x=>Math.round(clamp(30+x.green*100*.9*(x.drought/60+.4)));
+  $('coolTiles').innerHTML=tile('Heat exposure',Math.round(b.heat)+' ('+(b.heat-a.heat>=0?'+':'')+Math.round(b.heat-a.heat)+')')+tile('Air temp (illustrative)',(dt>=0?'+':'')+dt.toFixed(1)+'°C')+tile('Water requirement idx',wreq(b)+' ('+(wreq(b)-wreq(a)>=0?'+':'')+(wreq(b)-wreq(a))+')')+tile('Resilience',Math.round(b.resil)+' ('+(b.resil-a.resil>=0?'+':'')+Math.round(b.resil-a.resil)+')');
+}
+$('gc').oninput=()=>{if(SITE)renderCool()};
+/* actions */
+function renderActions(){
+  const m=M,c=[];
+  c.push([m.drought+m.heat*.4,'Plant drought-tolerant trees',`Start with ${RANK[0].n} and ${RANK[1].n}.`,'High','Low–medium','Easy','Shade and habitat']);
+  c.push([m.drought*1.1+(m.imperv>.5?15:0),'Create a rainwater recharge zone','Pits or rain gardens near planting sites.','High','Medium','Moderate','Soil moisture and groundwater']);
+  c.push([m.heat*1.1,'Increase shaded green cover','Prioritise streets and open paved areas.','High','Medium','Moderate','Cooler surfaces']);
+  c.push([m.imperv*80,'Reduce exposed paved surface','Swap to permeable paving where possible.','Medium','High','Hard','Less runoff and heat storage']);
+  c.push([m.flood*.9,'Add vegetated drainage','Bioswales along runoff paths.','Medium','Medium','Moderate','Slower, cleaner runoff']);
+  c.push([35,'Monitor soil moisture','Check trees weekly for the first two seasons.','Medium','Low','Easy','Early warning of failure']);
+  c.sort((a,b)=>b[0]-a[0]);
+  $('actions').innerHTML=c.slice(0,5).map((a,i)=>`<div class="glass act"><div class="n">${i+1}</div><div><b>${a[1]}</b><span class="small muted">${a[2]}</span><div class="m"><span class="pill">Impact: ${a[3]}</span><span class="pill">Cost: ${a[4]}</span><span class="pill">Difficulty: ${a[5]}</span><span class="pill">Benefit: ${a[6]}</span></div></div></div>`).join('');
+}
+/* impact */
+function renderImpact(){
+  const ha=+$('ha').value;$('haTxt').textContent=ha+' ha';
+  const trees=Math.round(250*ha*M.score/100), w=waterCalc(SITE,M,1000);
+  const water=Math.round(M.rain*ha*10000*M.imperv*.8*.3/1000); // kL/yr, 30% of paved runoff captured
+  const cool=evaluate(SITE,0,Math.min(.8,SITE.green+.2)), dh=Math.round(M.heat-cool.heat);
+  const carbon=(trees*20/1000).toFixed(1);
+  $('stats').innerHTML=[['🌳',trees.toLocaleString(),'Trees recommended','Illustrative estimate'],['💧',water.toLocaleString()+' kL/yr','Potential water managed','Illustrative: 30% of paved runoff'],['🌡','−'+dh+' pts','Heat-risk reduction potential','Modelled, for +20 pts tree cover'],['🌿','+20 pts','Green-cover improvement','Scenario target'],['🌍','~'+carbon+' t CO₂/yr','Estimated carbon benefit','Illustrative: ~20 kg/tree/yr at maturity']].map(s=>`<div class="glass stat"><span class="ic">${s[0]}</span><b>${s[1]}</b><span>${s[2]}</span><br><span class="small dim">${s[3]}</span></div>`).join('')+`<div class="glass stat" style="grid-column:1/-1"><span class="pend">Measured survival, canopy growth and verified carbon: Awaiting verified field data.</span></div>`;
+}
+$('ha').oninput=()=>{if(SITE)renderImpact()};
+function renderTransparency(){
+  const s=SITE.src, live=k=>s[k]==='LIVE';
+  const rows=[['Coordinates','USER','Where you clicked or searched'],['Temperature',s.temp,live('temp')?'Open-Meteo current conditions':'Latitude-based model'],['Humidity',s.hum,live('hum')?'Open-Meteo current conditions':'Model'],['Soil moisture',s.soil,live('soil')?'Open-Meteo top-soil (0–1 cm) model, averaged today':'Model'],['Sunlight',s.sun,live('sun')?'Derived from current cloud cover':'Model'],['Rainfall / year',s.rain,live('rain')?'Open-Meteo archive, last calendar year':'Latitude-based model'],['Land type & green cover','DEMO','Synthetic noise field, no satellite land cover yet'],['Risk indices, resilience, suitability','MODELLED','Rule-based formulas in this page'],['Tree ranking','MODELLED','Hand-curated species traits'],['Water & carbon estimates','MODELLED','Simple coefficients, illustrative'],['Community entries','USER','Stored in your browser only']];
+  $('trBody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${tagHtml(r[1])}</td><td class="muted">${r[2]}</td></tr>`).join('');
+}
+
+/* ========== planner & zones ========== */
+function siteName(s){return s.name||`${s.lat.toFixed(3)}, ${s.lng.toFixed(3)}`}
+function recordHistory(){
+  if(!SITE||!SITE.name||SITE.name==='Analysing…')return;
+  const key=SITE.lat.toFixed(4)+SITE.lng.toFixed(4);
+  const e={key,name:SITE.name,score:M.score,verdict:M.verdict,tree:RANK[0].n,tree2:RANK[1].n,M:{...M},lat:SITE.lat,lng:SITE.lng};
+  const i=history.findIndex(h=>h.key===key);if(i>=0)history[i]=e;else history.push(e);
+}
+function updatePlanner(){
+  if(!CELLS.length)return;
+  const cs=CELLS.slice(0,900);
+  const hp=cs.filter(c=>c.ev.score>=75).length,lo=cs.filter(c=>c.ev.score<50).length,wa=cs.filter(c=>c.s.imperv>.55&&c.s.rain>500).length,cr=cs.filter(c=>c.ev.heat>=65||c.ev.flood>=70).length;
+  $('pStats').innerHTML=[[history.length,'Sites analysed'],[cs.length,'Zones in view'],[hp,'High-priority zones (score ≥ 75)'],[lo,'Low-suitability zones (< 50)'],[wa,'Water-harvesting opportunities'],[cr,'Climate-risk zones']].map(x=>`<div class="glass"><b>${x[0]}</b><span class="small muted">${x[1]}</span></div>`).join('');
+  $('pTable').innerHTML=history.length?history.map(h=>`<tr><td>${esc(h.name)}</td><td>${h.score}</td><td>${h.verdict}</td><td>${h.tree}</td></tr>`).join(''):'<tr><td colspan="4" class="muted">No sites analysed yet.</td></tr>';
+  const cnt={};history.forEach(h=>[h.tree,h.tree2].forEach(t=>cnt[t]=(cnt[t]||0)+1));
+  $('pSpecies').innerHTML=Object.keys(cnt).length?Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<span class="pill" style="margin:0 6px 6px 0;display:inline-block">${t} × ${n}</span>`).join(''):'Analyse a site to see species.';
+}
+function updateZoneLists(){
+  if(!CELLS.length)return;
+  const top=[...CELLS].sort((a,b)=>b.ev.score-a.ev.score).slice(0,4), gr=[...CELLS].sort((a,b)=>b.s.green-a.s.green).slice(0,3);
+  const li=(c,txt)=>`<button data-la="${c.la+c.d/2}" data-ln="${c.ln+c.d/2}"><span>${c.la.toFixed(3)}, ${c.ln.toFixed(3)}</span><b>${txt}</b></button>`;
+  $('topZones').innerHTML=top.map(c=>li(c,'Score '+c.ev.score)).join('');
+  $('greenZones').innerHTML=gr.map(c=>li(c,Math.round(c.s.green*100)+'% green')).join('');
+  document.querySelectorAll('#topZones button,#greenZones button').forEach(b=>b.onclick=()=>{const la=+b.dataset.la,ln=+b.dataset.ln;map.flyTo([la,ln],Math.max(map.getZoom(),13));setSite(la,ln,{});document.getElementById('climate-map').scrollIntoView()});
+}
+/* community */
+let COM={items:[],adopted:[]};
+try{const s=localStorage.getItem('georoot_com');if(s)COM=JSON.parse(s)}catch(e){}
+function saveCom(){try{localStorage.setItem('georoot_com',JSON.stringify(COM))}catch(e){}}
+function renderCom(){
+  $('cN1').textContent=COM.items.length;$('cN2').textContent=COM.adopted.length;$('cN3').textContent=0;
+  $('feed').innerHTML=COM.items.length||COM.adopted.length?[...COM.adopted.map(a=>`<div class="it">🌱 Adopted zone near ${esc(a.name)}</div>`),...COM.items.map(i=>`<div class="it"><b>${esc(i.type)}</b> · ${esc(i.name)}${i.note?'<br><span class="muted">'+esc(i.note)+'</span>':''}</div>`)].join(''):'<div class="it muted">Nothing logged yet. Submit the first request.</div>';
+}
+$('cSubmit').onclick=()=>{if(!SITE)return;COM.items.unshift({type:$('cType').value,name:siteName(SITE),note:$('cNote').value.trim()});$('cNote').value='';saveCom();renderCom()};
+$('cAdopt').onclick=()=>{if(!SITE)return;const k=SITE.lat.toFixed(3)+SITE.lng.toFixed(3);if(!COM.adopted.find(a=>a.k===k)){COM.adopted.unshift({k,name:siteName(SITE)});saveCom();renderCom()}};
+renderCom();
+
+/* report */
+function reportHtml(){
+  const t=RANK.slice(0,3).map(x=>`${x.n} (${x.fit}%)`).join(', '), w=waterCalc(SITE,M,+$('roof').value);
+  const f=[0,2,5].map(k=>`${k?'+'+k+'°C':'Today'}: ${evaluate(SITE,k).score}%`).join(' · ');
+  return`<h3>GeoRoot site report</h3><p class="muted small">${esc(siteName(SITE))} · ${SITE.lat.toFixed(4)}, ${SITE.lng.toFixed(4)} · Generated ${new Date().toLocaleDateString()}. Prototype output.</p>
+  <h4>AI score</h4><p>${M.score}/100 — ${M.verdict}. ${esc(whyText())}</p>
+  <h4>Environmental conditions</h4><ul><li>Temperature ${SITE.temp.toFixed(1)}°C (${SITE.src.temp})</li><li>Humidity ${Math.round(SITE.hum)}% (${SITE.src.hum})</li><li>Soil moisture ${Math.round(SITE.soil)}% (${SITE.src.soil})</li><li>Sunlight ${Math.round(SITE.sun)}% (${SITE.src.sun})</li><li>Rainfall ${Math.round(SITE.rain)} mm/yr (${SITE.src.rain})</li><li>Land type ${SITE.land} (DEMO)</li></ul>
+  <h4>Recommended trees</h4><p>${t}</p>
+  <h4>Climate risks (modelled)</h4><p>Heat ${Math.round(M.heat)} · Drought ${Math.round(M.drought)} · Flood ${Math.round(M.flood)} · Air quality ${Math.round(M.aq)} · Resilience ${Math.round(M.resil)}/100</p>
+  <h4>Water strategy</h4><p>${w.iv.map(i=>i[0]).join(', ')}. Estimated ${(w.litres/1000).toFixed(1)} kL/yr from ${$('roof').value} m² of roof (estimate).</p>
+  <h4>Future scenarios (plantability)</h4><p>${f}</p>
+  <h4>Site story</h4><p>${esc(storyText())}</p>
+  <div style="margin-top:18px;display:flex;gap:8px"><button class="btn p sm" id="mDl">Download report</button><button class="btn s sm" id="mPr">Print / save as PDF</button><button class="btn s sm" id="mCl">Close</button></div>`;
+}
+$('genReport').onclick=()=>{if(!SITE)return;$('modalBox').innerHTML=reportHtml();$('modal').classList.add('open');
+  $('mCl').onclick=()=>$('modal').classList.remove('open');
+  const body=()=>`<!DOCTYPE html><meta charset=utf-8><title>GeoRoot report</title><body style="font-family:sans-serif;max-width:720px;margin:30px auto;line-height:1.5">${$('modalBox').innerHTML.replace(/<div style="margin-top:18px.*<\/div>/s,'')}`;
+  $('mDl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body()],{type:'text/html'}));a.download='georoot-site-report.html';a.click()};
+  $('mPr').onclick=()=>{const w=window.open('');if(w){w.document.write(body());w.document.close();w.print()}}};
+$('modal').onclick=e=>{if(e.target.id==='modal')$('modal').classList.remove('open')};
+
+/* ========== search & geolocation ========== */
+async function search(){
+  const q=$('q').value.trim();if(!q)return;
+  try{const j=await getJSON('https://geocoding-api.open-meteo.com/v1/search?count=1&name='+encodeURIComponent(q));
+    if(j.results&&j.results[0]){const r=j.results[0];map.flyTo([r.latitude,r.longitude],13);setSite(r.latitude,r.longitude,{name:r.name+(r.country?', '+r.country:'')})}
+    else $('rNote').textContent='No place found for "'+q+'". Try a different spelling.';}
+  catch(e){$('rNote').textContent='Search is unavailable right now. Click the map to pick a location instead.'}
+}
+$('qGo').onclick=search;$('q').onkeydown=e=>{if(e.key==='Enter')search()};
+$('locMe').onclick=()=>{if(!navigator.geolocation){$('rNote').textContent='This browser has no location support. Click the map instead.';return}
+  navigator.geolocation.getCurrentPosition(p=>{map.flyTo([p.coords.latitude,p.coords.longitude],13);setSite(p.coords.latitude,p.coords.longitude,{name:'My location'})},()=>{$('rNote').textContent='Location permission was denied. Click the map to choose a spot.'},{timeout:8000})};
+
+/* ========== AI assistant (rule-based, honest) ========== */
+const aiLog=$('aiLog');
+function say(t,c){const d=document.createElement('div');d.className='msg '+c;d.textContent=t;aiLog.appendChild(d);aiLog.scrollTop=aiLog.scrollHeight}
+function answer(q){
+  if(!SITE)return 'Select a location on the map first, then I can answer using its data.';
+  q=q.toLowerCase();const t=RANK[0],n=Math.round;
+  const m=q.match(/\+?\s*(\d)\s*°?\s*c/);
+  if(m){const e=evaluate(SITE,+m[1]);return `At +${m[1]}°C (scenario, not a forecast), plantability at this site moves from ${M.score} to ${e.score}. Heat stress goes ${n(M.heat)} → ${n(e.heat)} and drought risk ${n(M.drought)} → ${n(e.drought)}.`}
+  if(/rain|harvest|water/.test(q)){const w=waterCalc(SITE,M,+$('roof').value);return `Best options here: ${w.iv.map(i=>i[0]).join(', ')}. Estimated ${(w.litres/1000).toFixed(1)} kL/yr from a ${$('roof').value} m² roof (estimate, ${SITE.src.rain==='LIVE'?'using last year\'s measured rainfall':'using a modelled rainfall figure'}).`}
+  if(/tree|species|which/.test(q))return `Top matches: ${RANK.slice(0,3).map(x=>x.n+' '+x.fit+'%').join(', ')}. For ${t.n}: ${treeWhy(t,M)}`;
+  if(/risk|why/.test(q)){const top=RISKS.map(r=>[r[1],M[r[0]]]).sort((a,b)=>b[1]-a[1]).slice(0,3);return `Highest modelled risks: ${top.map(x=>x[0].replace(/^\S+\s/,'')+' '+n(x[1])).join(', ')}. Resilience is ${n(M.resil)}/100. These indices are modelled, not measured.`}
+  if(/resilien|improve|increase|cool/.test(q)){const e=evaluate(SITE,0,Math.min(.8,SITE.green+.2));return `Adding about 20 points of tree cover would raise modelled resilience from ${n(M.resil)} to ${n(e.resil)}. Add rainwater recharge to protect soil moisture. See the action list under Future Simulator.`}
+  if(/where|plant/.test(q)){const b=[...CELLS].sort((a,c)=>c.ev.score-a.ev.score)[0];return b?`In the current map view, the highest-scoring cell is near ${b.la.toFixed(3)}, ${b.ln.toFixed(3)} (score ${b.ev.score}). It's in the "Recommended planting zones" list under Community. The grid is a demo model.`:'Zoom the map so I can compare nearby zones.'}
+  return `I can answer from this dashboard about planting, trees, risk, rainwater, resilience and warming scenarios (e.g. "What happens at +3°C?"). I don't have data beyond what the page shows.`;
+}
+['Where should I plant trees?','Which tree is suitable here?','Why is this area high risk?','Where should we harvest rainwater?','What happens at +3°C?','How can we increase climate resilience?'].forEach(q=>{const b=document.createElement('button');b.className='chip';b.textContent=q;b.onclick=()=>ask(q);$('aiChips').appendChild(b)});
+function ask(q){say(q,'u');setTimeout(()=>say(answer(q),'a'),250)}
+$('aiForm').onsubmit=e=>{e.preventDefault();const v=$('aiIn').value.trim();if(v){ask(v);$('aiIn').value=''}};
+function toggleAI(){const o=$('aiPanel').classList.toggle('open');$('aiBtn').setAttribute('aria-expanded',o);if(o&&!aiLog.children.length)say('Hi, I answer from the selected site\'s data. Pick a question below or type your own.','a')}
+$('aiBtn').onclick=toggleAI;$('navAI').onclick=e=>{e.preventDefault();toggleAI()};
+
+/* ========== demo mode ========== */
+let demoT=[],demoOn=false;
+function cap(html){const c=$('cap');c.style.display='block';c.innerHTML=html+' <button class="btn s sm" onclick="stopDemo()">Stop</button>'}
+function go(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+function slide(el,to,ms){const from=+el.value,n=Math.abs(to-from)||1;for(let i=1;i<=n;i++)demoT.push(setTimeout(()=>{el.value=from+(to>from?i:-i);el.oninput()},i*ms))}
+function stopDemo(){demoT.forEach(clearTimeout);demoT=[];demoOn=false;$('cap').style.display='none'}
+function startDemo(){
+  stopDemo();demoOn=true;const S=SAMPLES[3];
+  $('dT').value=0;$('aiPanel').classList.remove('open');
+  const steps=[
+   ()=>{cap('<b>1 · Select a location</b> South Delhi, a sample site.');go('climate-map');map.flyTo([S[1],S[2]],13,{duration:1.2});setSite(S[1],S[2],{name:'South Delhi'})},
+   ()=>{cap('<b>2 · Analyse the environment</b> Live weather plus modelled land data, each tagged.')},
+   ()=>{cap(`<b>3 · AI suitability score</b> ${M?M.score:''}/100 with a plain-language reason.`)},
+   ()=>{cap('<b>4 · Recommend trees</b> Ranked against this site\'s heat, drought and flood profile.');go('tree-intel')},
+   ()=>{cap('<b>5 · Rainwater potential</b> Estimated harvest and best interventions.');go('water-intel')},
+   ()=>{cap('<b>6 · Climate risk</b> Seven meters and one resilience score.');go('climate-risk')},
+   ()=>{cap('<b>7 · Move to +2°C</b> Watch plantability fall.');go('future');slide($('dT'),2,500)},
+   ()=>{cap('<b>8 · Move to +5°C</b> The stress case.');slide($('dT'),5,500)},
+   ()=>{cap('<b>9 · Climate Domino</b> How one problem triggers the next.');go('domino');domPlay()},
+   ()=>{cap('<b>10 · Action plan</b> What to do first.');$('dT').value=0;renderFuture();go('future')},
+   ()=>{cap('<b>Every tree deserves the right place.</b>');go('overview')},
+   ()=>stopDemo()];
+  const wait=[0,9000,7000,9000,9000,9000,10000,8000,11000,10000,7000,4000];
+  let t=0;steps.forEach((f,i)=>{t+=wait[i];demoT.push(setTimeout(f,t))});
+}
+$('demoBtn').onclick=startDemo;$('ctaDemo').onclick=startDemo;
+
+/* ========== nav highlight ========== */
+const navIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('#side a[data-n]').forEach(a=>a.classList.toggle('on',a.dataset.n===e.target.id))}}),{rootMargin:'-40% 0px -55% 0px'});
+document.querySelectorAll('header[id],section[id]').forEach(s=>navIO.observe(s));
+
+/* ========== atmosphere canvas ========== */
+(function(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=$('atmos'),x=c.getContext('2d');let w,h,P=[];
+  function rs(){w=c.width=innerWidth;h=c.height=innerHeight;P=Array.from({length:Math.round(w*h/26000)},()=>({x:Math.random()*w,y:Math.random()*h,v:.15+Math.random()*.5,r:.6+Math.random()*1.6,d:Math.random()<.35}))}
+  rs();addEventListener('resize',rs);
+  (function f(){x.clearRect(0,0,w,h);P.forEach(p=>{p.y+=p.v;p.x+=Math.sin(p.y/60)*.15;if(p.y>h){p.y=-10;p.x=Math.random()*w}
+    if(p.d){x.strokeStyle='rgba(56,189,248,.18)';x.beginPath();x.moveTo(p.x,p.y);x.lineTo(p.x-1,p.y+9);x.stroke()}
+    else{x.fillStyle='rgba(74,222,128,.22)';x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()}});requestAnimationFrame(f)})();
+})();
+
+/* ========== init ========== */
+drawGrid();
+setSite(28.6139,77.2090,{name:'Central Delhi (starter site)'});
+</script>
+</body>
+</html>
